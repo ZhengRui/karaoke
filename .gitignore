@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 生成的中间产物
+build/
+
+# 大体积媒体(输入/输出,不适合入库)
+*.mp4
+*.wav
+photos/
+separated/
+
+# AI 头脑风暴笔记
+.superpowers/
