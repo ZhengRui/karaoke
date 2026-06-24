@@ -79,6 +79,35 @@ python build_video.py --help
 - **字幕**：`--font` `--base-size` `--next-scale` `--y-cur` `--y-next` `--rise-ms` `--out-ms` `--intro-lead`
 - **其他**：`--seed`（照片洗牌随机种子，固定即可复现）
 
+## 字幕与音频不同步怎么办
+
+字幕的时间完全由 `lyrics.lrc` 里的 `[mm:ss.cc]` 时间戳决定。不同步分两种情况：
+
+### 整体偏移(最常见)
+
+所有字幕统一早了或晚了几秒——通常是 LRC 来源和你的音频版本片头长度不同。用 `--offset` 整体平移即可：
+
+- **正数 = 字幕延后**（字幕比音频早出现时,往后推）
+- **负数 = 字幕提前**（字幕比音频晚出现时）
+
+```bash
+# 字幕整体早了 0.8 秒,往后推
+python build_video.py --stage subs --offset 0.8   # 只重生成字幕,快速试
+python build_video.py --offset 0.8                # 试好后跑完整流程
+```
+
+> 校验技巧:先 `--stage subs --offset X` 只重生成字幕,再 `--stage finalize` 合成预览,反复试出合适的 X,省得每次全流程重跑。也可以先在播放器(如 VLC 的 `G`/`H` 键)里调字幕延迟试出偏移量,再写回 `--offset`。
+>
+> 注意 `--intro-lead` 只影响第一句的淡入观感,不是全局对齐开关,别拿它对时间。
+
+### 逐句漂移(开头对得上,越往后越偏)
+
+说明这份 LRC 是给另一个时长/变速版本打的轴,固定偏移救不了。解决办法:
+
+1. 换一份与你音频版本匹配的 LRC,再用 `--offset` 微调;
+2. 用语音识别自动重新打轴——把 Demucs 分离出的干净人声 `separated/<歌>/vocals.wav` 喂给 **Whisper**(`whisper-timestamped` / `WhisperX`)生成词级时间戳,转成 LRC;
+3. 用 [Aegisub](https://aegisub.org/) 等工具边听边手动打轴(最准但费时)。
+
 ## 测试
 
 ```bash

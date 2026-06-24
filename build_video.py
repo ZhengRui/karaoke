@@ -44,6 +44,9 @@ def audio_duration(audio):
 def stage_subs(cfg):
     dur = audio_duration(cfg.audio)
     lines = parse_lrc(cfg.lrc.read_text())
+    if cfg.offset:
+        for ln in lines:
+            ln.time += cfg.offset
     ass = build_ass(lines, audio_end=dur, font=cfg.font,
                     base_size=cfg.base_size, next_scale=cfg.next_scale,
                     y_cur=cfg.y_cur, y_next=cfg.y_next,
@@ -146,6 +149,8 @@ def build_parser():
                        help="切句时当前句原地淡出的时长(毫秒) (默认: %(default)s)")
     g_sub.add_argument("--intro-lead", type=float, default=INTRO_LEAD,
                        help="第一句提前多少秒作为下句淡入 (默认: %(default)s)")
+    g_sub.add_argument("--offset", type=float, default=0.0,
+                       help="字幕整体时间平移秒数,正=延后/负=提前,用于对齐音频 (默认: %(default)s)")
 
     g_misc = ap.add_argument_group("其他")
     g_misc.add_argument("--seed", type=int, default=SEED,
